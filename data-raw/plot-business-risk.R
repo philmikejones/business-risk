@@ -67,4 +67,10 @@ plot = ggplot() +
     geom_sf(data = region) +
     geom_sf(data = risk, aes(size = p_bus_risk, colour = `% of total population`)) +
     scale_colour_viridis()
-ggsave(plot, file = paste0("export/region_", "eastmidlands", ".pdf"))
+ggsave(plot, file = paste0("export/region_", "eastmidlands", "_bus_denom.pdf"))
+
+plot = ggplot() +
+    geom_sf(data = region) +
+    geom_sf(data = risk, aes(size = p_bus_pop_risk, colour = p_bus_pop_risk)) +
+    scale_colour_viridis()
+ggsave(plot, file = paste0("export/region_", "eastmidlands", "_popdenom.pdf"))
