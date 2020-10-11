@@ -7,6 +7,9 @@ library("rmapshaper")
 library("ggplot2")
 library("viridis")
 
+dir.create("inst/extdata/regions", recursive = TRUE, showWarnings = FALSE)
+dir.create("export")
+
 if(!file.exists("inst/extdata/regions/infuse_rgn_2011.shp")) {
     download.file("https://borders.ukdataservice.ac.uk/ukborders/easy_download/prebuilt/shape/infuse_rgn_2011.zip", destfile = "inst/extdata/regions/infuse_rgn_2011.zip")
     unzip("inst/extdata/regions/infuse_rgn_2011.zip", exdir = "inst/extdata/regions")
@@ -36,11 +39,16 @@ cities =
     sf::st_transform(crs = sf::st_crs(27700))
 
 risk = 
-    readr::read_csv("cities-business-risk.csv") %>%
+    suppressWarnings(readr::read_csv("cities-business-risk.csv")) %>%  # Warnings about about empty columns which I drop
+    select(-X15, -X21) %>%
     mutate(
         City = if_else(City == "Kingston upon Hull", "Hull", City),
         City = if_else(City == "Newcastle upon Tyne", "Newcastle Upon Tyne", City),
         City = if_else(City == "Brighton", "Brighton & Hove", City)
+    ) %>%
+    mutate(
+        p_bus_risk = `Total at Risk` / Total,
+        p_bus_pop_risk = `Total at Risk` / Population
     )
 
 nrow_risk = nrow(risk)
@@ -53,11 +61,10 @@ stopifnot(
     all(!is.na(unlist(risk$geometry)))
 )
 
-for(i in seq_along(nrow(regions))) {
-    region = regions[i, ]
-    plot = ggplot() +
-        geom_sf(data = region) +
-        geom_sf(data = risk, aes(size = `% of total population`, colour = `% of total population`)) +
-        scale_colour_viridis()
-    ggsave(plot, file = paste0("region_", i, ".pdf"))
-}
+region = regions[regions[["name"]] == "East Midlands", ]
+risk = risk[region, ]
+plot = ggplot() +
+    geom_sf(data = region) +
+    geom_sf(data = risk, aes(size = p_bus_risk, colour = `% of total population`)) +
+    scale_colour_viridis()
+ggsave(plot, file = paste0("export/region_", "eastmidlands", ".pdf"))
