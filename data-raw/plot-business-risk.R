@@ -9,7 +9,7 @@ library("ggplot2")
 library("viridis")
 
 dir.create("inst/extdata/regions", recursive = TRUE, showWarnings = FALSE)
-dir.create("export")
+dir.create("export", showWarnings = FALSE)
 
 if(!file.exists("inst/extdata/regions/infuse_rgn_2011.shp")) {
     download.file("https://borders.ukdataservice.ac.uk/ukborders/easy_download/prebuilt/shape/infuse_rgn_2011.zip", destfile = "inst/extdata/regions/infuse_rgn_2011.zip")
