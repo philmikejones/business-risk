@@ -1,6 +1,7 @@
 library("assertthat")
 library("dplyr")
 library("readr")
+library("readxl")
 library("stringr")
 library("sf")
 library("rmapshaper")
@@ -39,8 +40,8 @@ cities =
     sf::st_transform(crs = sf::st_crs(27700))
 
 risk = 
-    suppressWarnings(readr::read_csv("cities-business-risk.csv")) %>%  # Warnings about about empty columns which I drop
-    select(-X15, -X21) %>%
+    readxl::read_xlsx("cities-business-risk.xlsx", sheet = "Sheet1") %>%
+    select(-`...15`, -`...21`) %>%
     mutate(
         City = if_else(City == "Kingston upon Hull", "Hull", City),
         City = if_else(City == "Newcastle upon Tyne", "Newcastle Upon Tyne", City),
