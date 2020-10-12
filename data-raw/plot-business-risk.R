@@ -62,16 +62,28 @@ stopifnot(
     all(!is.na(unlist(risk$geometry)))
 )
 
+plot = ggplot() +
+    geom_sf(data = regions) +
+    geom_sf(data = risk, aes(size = p_bus_risk, colour = p_bus_risk)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
+    scale_colour_viridis()
+ggsave(plot, file = "export/uk_bus_risk.pdf")
+
 region = regions[regions[["name"]] == "East Midlands", ]
 risk = risk[region, ]
 plot = ggplot() +
     geom_sf(data = region) +
     geom_sf(data = risk, aes(size = p_bus_risk, colour = `% of total population`)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
     scale_colour_viridis()
 ggsave(plot, file = paste0("export/region_", "eastmidlands", "_bus_denom.pdf"))
 
 plot = ggplot() +
     geom_sf(data = region) +
     geom_sf(data = risk, aes(size = p_bus_pop_risk, colour = p_bus_pop_risk)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
     scale_colour_viridis()
 ggsave(plot, file = paste0("export/region_", "eastmidlands", "_popdenom.pdf"))
