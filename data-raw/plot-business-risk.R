@@ -1,6 +1,7 @@
 library("assertthat")
 library("dplyr")
 library("readr")
+library("readxl")
 library("stringr")
 library("sf")
 library("rmapshaper")
@@ -8,7 +9,7 @@ library("ggplot2")
 library("viridis")
 
 dir.create("inst/extdata/regions", recursive = TRUE, showWarnings = FALSE)
-dir.create("export")
+dir.create("export", showWarnings = FALSE)
 
 if(!file.exists("inst/extdata/regions/infuse_rgn_2011.shp")) {
     download.file("https://borders.ukdataservice.ac.uk/ukborders/easy_download/prebuilt/shape/infuse_rgn_2011.zip", destfile = "inst/extdata/regions/infuse_rgn_2011.zip")
@@ -39,8 +40,8 @@ cities =
     sf::st_transform(crs = sf::st_crs(27700))
 
 risk = 
-    suppressWarnings(readr::read_csv("cities-business-risk.csv")) %>%  # Warnings about about empty columns which I drop
-    select(-X15, -X21) %>%
+    readxl::read_xlsx("cities-business-risk.xlsx", sheet = "Sheet1") %>%
+    select(-`...15`, -`...21`) %>%
     mutate(
         City = if_else(City == "Kingston upon Hull", "Hull", City),
         City = if_else(City == "Newcastle upon Tyne", "Newcastle Upon Tyne", City),
@@ -61,16 +62,28 @@ stopifnot(
     all(!is.na(unlist(risk$geometry)))
 )
 
+plot = ggplot() +
+    geom_sf(data = regions) +
+    geom_sf(data = risk, aes(size = p_bus_risk, colour = p_bus_risk)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
+    scale_colour_viridis()
+ggsave(plot, file = "export/uk_bus_risk.pdf")
+
 region = regions[regions[["name"]] == "East Midlands", ]
 risk = risk[region, ]
 plot = ggplot() +
     geom_sf(data = region) +
     geom_sf(data = risk, aes(size = p_bus_risk, colour = `% of total population`)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
     scale_colour_viridis()
 ggsave(plot, file = paste0("export/region_", "eastmidlands", "_bus_denom.pdf"))
 
 plot = ggplot() +
     geom_sf(data = region) +
     geom_sf(data = risk, aes(size = p_bus_pop_risk, colour = p_bus_pop_risk)) +
+    coord_sf(crs = 27700) +
+    theme(panel.grid = element_blank()) +
     scale_colour_viridis()
 ggsave(plot, file = paste0("export/region_", "eastmidlands", "_popdenom.pdf"))
