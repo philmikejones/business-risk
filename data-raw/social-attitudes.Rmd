@@ -1,0 +1,114 @@
+---
+title: "Social attitudes"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r packages}
+library("dplyr")
+library("haven")
+```
+
+```{r datasets}
+bsa = 
+    haven::read_spss("../inst/extdata/british-social-attitudes-2018/UKDA-8606-spss/spss/spss24/bsa2018_final_ukda.sav") %>%
+    haven::as_factor() %>%
+    filter(gor_id == "East Midlands")
+
+aps =
+    haven::read_spss("../inst/extdata/annual-population-survey-2019/UKDA-8632-spss/spss/spss25/apsp_jan-dec19_eul_pwta18.sav") %>%
+    haven::as_factor() %>%
+    filter(GOR9D == "East Midlands")
+```
+
+
+# British Social Attitudes 2018
+
+We could use elements of the Blaise questionnaire, asked in the British Social Attitudes 2018 survey.
+In particular there's a section on 'concerns' and an abridged version might be of interest:
+
+Q514: `lifecon1c`--`lifecon3c` are derived from `LifeConc1A`, etc.
+"Here is a list of things some people may feel concerned about.
+I am going to ask you about the things you are most concerned about, you
+can select up to three from the list.
+Firstly, what would you say you are most concerned about at the moment?
+Please read through the whole list before deciding."
+CODE ONE ONLY
+
+Code | Response
+-----|----------
+1.   | Your physical health
+2.   | Your mental health
+3.   | Your relationship with your partner or spouse
+4.   | Your relationships with your family
+5.   | Your relationships with friends
+6.   | Your family's health and wellbeing
+7.   | Your work-life balance
+8.   | Your education, qualifications or training
+9.   | Your work situation
+10.  | Money or debt
+11.  | Your housing situation
+12.  | How safe you feel in your local area
+13.  | Your appearance (including your weight and looks)
+14.  | Your social life
+15.  | Other (WRITE IN)
+16.  | (SPONTANEOUS: No concerns)
+98.  | (Don't know)
+99.  | (Refusal)
+
+For respondents in the East Midlands (no Derbyshire/Derby option) first concern:
+
+```{r concerns}
+bsa %>%
+    count(lifecon1c) %>%
+    arrange(desc(n))
+```
+
+Second concern:
+
+```{r 2-concern}
+bsa %>%
+    count(lifecon2c) %>%
+    arrange(desc(n))
+```
+
+'Next most' concerned:
+
+```{r 3-concern}
+bsa %>%
+    count(lifecon3c) %>%
+    arrange(desc(n))
+```
+
+# ONS Domains and Measures of National Well--being
+
+Domains of well--being used by ONS are:
+
+- Personal well--being
+- Relationships
+- Health
+- What we do
+- Where we live
+- Personal finance
+- The economy
+- Education and skills
+- Governance
+- The natural environment
+
+Source: `https://www.ons.gov.uk/peoplepopulationandcommunity/wellbeing/datasets/measuringnationalwellbeingdomainsandmeasures`
+
+## Personal well--being
+
+The personal well--being domain uses the following measures from the Annual Population Survey (taken from 2019 survey):
+
+1. `SATIS` - Overall, how satisfied are you with your life nowadays? 0--10
+1. `WORTH` - Overall, to what extent do you feel that the things you do in your life are worthwhile? 0--10
+1. `HAPPY` - Overall, how happy did you feel yesterday? 0--10
+1. `ANXIOUS` - On a scale where nought is 'not at all anxious' and 10 is 'completely anxious', overall, how anxious did you feel yesterday? 0--10
+
+```{r personal-wellbeing}
+aps %>% count(SATIS)
+aps %>% count(WORTH)
+aps %>% count(HAPPY)
+aps %>% count(ANXIOUS)
+```
